@@ -16,6 +16,7 @@ pub mod write;
 mod listener;
 mod openapi;
 mod terminal;
+mod ui;
 mod ws;
 
 #[derive(serde::Deserialize)]
@@ -28,6 +29,7 @@ pub fn app() -> Router {
   Router::new()
     .merge(openapi::serve_docs())
     .route("/version", get(|| async { env!("CARGO_PKG_VERSION") }))
+    .route("/ui-config", get(ui::config))
     .nest("/auth", mogh_auth_server::api::router::<KomodoAuthImpl>())
     .nest("/user", user_router())
     .nest("/read", read::router())

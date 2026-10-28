@@ -12,7 +12,7 @@
 use std::{collections::HashMap, path::PathBuf};
 
 use mogh_auth_client::config::NamedOauthConfig;
-use serde::Deserialize;
+use serde::{Deserialize, Serialize};
 
 use crate::{
   deserializers::option_string_list_deserializer,
@@ -69,6 +69,8 @@ pub struct Env {
 
   /// Override `title`
   pub komodo_title: Option<String>,
+  /// Override `ui_theme`
+  pub komodo_ui_theme: Option<UiTheme>,
   /// Override `host`
   pub komodo_host: Option<String>,
   /// Override `port`
@@ -317,6 +319,18 @@ fn default_core_config_paths() -> Vec<PathBuf> {
   vec![PathBuf::from("/config")]
 }
 
+/// Instance background palette, independent of the user's light/dark mode.
+#[derive(
+  Debug, Clone, Copy, Default, Serialize, Deserialize, PartialEq, Eq,
+)]
+#[serde(rename_all = "lowercase")]
+pub enum UiTheme {
+  #[default]
+  Default,
+  Blue,
+  Violet,
+}
+
 /// # Core Configuration File
 ///
 /// The Core API initializes it's configuration by reading the environment,
@@ -339,6 +353,11 @@ pub struct CoreConfig {
   /// Default: 'Komodo'
   #[serde(default = "default_title")]
   pub title: String,
+
+  /// Instance background palette: `default`, `blue` or `violet`.
+  /// Applies before login and in both light and dark mode.
+  #[serde(default)]
+  pub ui_theme: UiTheme,
 
   /// The host to use with oauth redirect url, whatever host
   /// the user hits to access Komodo. eg `https://komodo.domain.com`.
@@ -932,6 +951,7 @@ impl Default for CoreConfig {
   fn default() -> Self {
     Self {
       title: default_title(),
+      ui_theme: Default::default(),
       host: default_host(),
       port: default_core_port(),
       bind_ip: default_core_bind_ip(),
@@ -1017,6 +1037,7 @@ impl CoreConfig {
     let config = self.clone();
     CoreConfig {
       title: config.title,
+      ui_theme: config.ui_theme,
       host: config.host,
       port: config.port,
       bind_ip: config.bind_ip,

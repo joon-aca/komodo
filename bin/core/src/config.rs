@@ -283,6 +283,7 @@ pub fn core_config() -> &'static CoreConfig {
 
       // Non secrets
       title: env.komodo_title.unwrap_or(config.title),
+      ui_theme: env.komodo_ui_theme.unwrap_or(config.ui_theme),
       host: env.komodo_host.unwrap_or(config.host),
       port: env.komodo_port.unwrap_or(config.port),
       bind_ip: env.komodo_bind_ip.unwrap_or(config.bind_ip),

@@ -25,6 +25,14 @@
 ## Default: 'Komodo'
 title = "Komodo"
 
+## Instance-wide background palette in both light and dark mode, including login.
+## Options: "default" (stock appearance), "blue", "violet".
+## This does not change status colors or the user's light/dark preference.
+## Restart Core and reload the browser after changing this setting.
+## Env: KOMODO_UI_THEME
+## Default: "default"
+ui_theme = "default"
+
 ## This should be the url used to access Komodo in browser, potentially behind DNS.
 ## Eg https://komodo.example.com or http://12.34.56.78:9120. This should match the address configured in your Oauth app.
 ## Env: KOMODO_HOST
