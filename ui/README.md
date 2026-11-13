@@ -24,3 +24,33 @@ Now you can start the dev ui server:
 ```sh
 yarn dev
 ```
+
+## Instance background palettes
+
+Set `KOMODO_UI_THEME` on **Core** to `blue` or `violet` to distinguish instances
+by their canvas, navigation, panels, inputs and dialogs. The same color family
+applies on login and in both light and dark mode. Users can still select light,
+dark or automatic mode using the existing theme menu.
+
+For example, in the Core service's Compose environment:
+
+```yaml
+environment:
+  KOMODO_UI_THEME: blue
+```
+
+Alternatively, set `ui_theme = "blue"` in the Core configuration file. The
+environment variable overrides the file. Restart Core and reload the browser to
+apply a change. Use `default` or remove the setting to restore the stock palette.
+Unknown configuration values are rejected at Core startup.
+
+The UI reads the palette from public `GET /ui-config` before rendering, without
+authentication or browser palette storage. The response contains only the preset
+name and uses `Cache-Control: no-store`. If the request fails, takes more than two
+seconds, or returns an unsupported value (including an older Core's HTML fallback),
+the UI starts with stock colors. Development UI pointed at `VITE_KOMODO_HOST`
+reads that Core's palette as well.
+
+Status, tag and destructive-action colors retain their existing meanings. This
+setting does not customize logos, favicons or display names; `KOMODO_TITLE` keeps
+its existing browser-title behavior.
