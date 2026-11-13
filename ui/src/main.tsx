@@ -6,7 +6,7 @@ import { Router } from "@/router";
 import { setAuthUrl, ThemeProvider } from "mogh_ui";
 import { themeAdditionalColors } from "@/lib/color";
 import { Notifications } from "@mantine/notifications";
-import { instanceThemeColors, loadInstanceTheme } from "@/lib/instance-theme";
+import { instanceThemeColors, loadUiConfig } from "@/lib/instance-theme";
 
 import "@mantine/core/styles.css";
 // ‼️ import extra package styles after core package styles
@@ -31,9 +31,9 @@ const client = new QueryClient({
 
 setAuthUrl(KOMODO_BASE_URL + "/auth");
 
-// Resolve instance colors before rendering login or authenticated content.
-// The palette stays in Core config; the browser only stores its mode preference.
-const instanceTheme = await loadInstanceTheme(KOMODO_BASE_URL);
+// Resolve instance colors and name before rendering login or authenticated
+// content. Both stay in Core config; the browser only stores its mode preference.
+const { theme: instanceTheme } = await loadUiConfig(KOMODO_BASE_URL);
 if (instanceTheme !== "default") {
   document.documentElement.dataset.komodoTheme = instanceTheme;
 }

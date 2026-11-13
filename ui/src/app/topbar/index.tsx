@@ -16,6 +16,7 @@ import TopbarUpdates from "@/app/topbar/updates";
 import OmniSearch from "@/app/topbar/omni-search";
 import WebsocketStatus from "@/app/topbar/websocket-status";
 import { useRead } from "@/lib/hooks";
+import { instanceName } from "@/lib/instance-theme";
 import TopbarLink from "./link";
 import TopbarAlerts from "./alerts";
 import KeyboardShortcuts from "./keyboard-shortcuts";
@@ -29,6 +30,7 @@ const Topbar = ({
 }) => {
   const version = useRead("GetVersion", {}, { refetchInterval: 30_000 }).data
     ?.version;
+  const instance = instanceName();
   return (
     <AppShell.Header
       renderRoot={(props) => (
@@ -43,7 +45,7 @@ const Topbar = ({
       py="0rem"
     >
       {/** LEFT AREA */}
-      <Group gap="xs" wrap="nowrap" w="fit-content">
+      <Group gap="xs" wrap="nowrap" w="fit-content" maw="100%">
         <Burger opened={opened} onClick={toggle} hiddenFrom="sm" size="sm" />
 
         <ActionIcon
@@ -68,6 +70,19 @@ const Topbar = ({
             KOMODO
           </Text>
         </Button>
+
+        {instance && (
+          <Text
+            fz={{ base: "md", md: "h3" }}
+            fw="450"
+            miw={0}
+            truncate
+            title={instance}
+            aria-label={`Instance: ${instance}`}
+          >
+            {instance}
+          </Text>
+        )}
       </Group>
 
       {/** OMNI SEARCH */}

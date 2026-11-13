@@ -1,5 +1,6 @@
 import { LoginPage } from "mogh_ui";
 import { useUserInvalidate } from "@/lib/hooks";
+import { appName } from "@/lib/instance-theme";
 
 export default function Login(props: {
   passkeyIsPending?: boolean;
@@ -9,7 +10,7 @@ export default function Login(props: {
   return (
     <LoginPage
       {...props}
-      appName="KOMODO"
+      appName={appName()}
       iconLink="/mogh-512x512.png"
       iconLinkAlt="moghtech"
       exampleConfigLink="https://github.com/moghtech/komodo/blob/main/config/core.config.toml"
