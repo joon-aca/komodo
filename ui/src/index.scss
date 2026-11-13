@@ -8,6 +8,16 @@ body[data-mantine-color-scheme="dark"] {
   background-color: #0f1115;
 }
 
+// Mantine uses the body token for the canvas, navbar and modal/drawer surfaces.
+// Scope the override so an unconfigured instance retains mogh_ui's stock theme.
+:root[data-komodo-theme][data-mantine-color-scheme] {
+  --mantine-color-body: var(--mantine-color-instance-body-0);
+}
+
+:root[data-komodo-theme] body {
+  background-color: var(--mantine-color-body);
+}
+
 .monaco-editor {
   position: absolute !important;
 }
