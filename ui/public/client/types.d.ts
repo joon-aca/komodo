@@ -4968,6 +4968,8 @@ export interface ContainerListItem {
     server_name?: string;
     /** The first name in Names, not including the initial '/' */
     name: string;
+    /** The project reported by Docker Compose, if available. */
+    compose_project?: string;
     /** The ID of this container */
     id?: string;
     /** The name of the image used when creating this container */

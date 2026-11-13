@@ -27,6 +27,9 @@ pub struct ContainerListItem {
   pub server_name: Option<String>,
   /// The first name in Names, not including the initial '/'
   pub name: String,
+  /// The project reported by Docker Compose, if available.
+  #[serde(default, skip_serializing_if = "Option::is_none")]
+  pub compose_project: Option<String>,
   /// The ID of this container
   #[serde(skip_serializing_if = "Option::is_none")]
   pub id: Option<String>,
@@ -70,6 +73,39 @@ pub struct ContainerListItem {
   /// can get it using InspectContainer
   #[serde(default, skip_serializing)]
   pub labels: HashMap<String, String>,
+}
+
+#[cfg(test)]
+mod tests {
+  use serde_json::json;
+
+  use super::ContainerListItem;
+
+  #[test]
+  fn compose_project_is_optional_and_labels_stay_private() {
+    let mut container = serde_json::from_value::<ContainerListItem>(
+      json!({ "name": "custom-name", "state": "running" }),
+    )
+    .unwrap();
+    assert!(container.compose_project.is_none());
+    let summary = serde_json::to_value(&container).unwrap();
+    assert!(summary.get("compose_project").is_none());
+
+    container.compose_project = Some(String::from("example"));
+    container.labels.insert(
+      String::from("com.docker.compose.project"),
+      String::from("example"),
+    );
+    let summary = serde_json::to_value(&container).unwrap();
+    assert_eq!(summary["compose_project"], "example");
+    assert!(summary.get("labels").is_none());
+    let round_trip =
+      serde_json::from_value::<ContainerListItem>(summary).unwrap();
+    assert_eq!(
+      round_trip.compose_project.as_deref(),
+      Some("example")
+    );
+  }
 }
 
 #[typeshare]
