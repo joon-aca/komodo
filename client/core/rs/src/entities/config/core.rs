@@ -1299,3 +1299,56 @@ impl mogh_server::session::SessionConfig for &CoreConfig {
     self.session_allow_cross_site
   }
 }
+
+#[cfg(test)]
+mod tests {
+  use serde_json::json;
+
+  use super::{CoreConfig, Env, UI_INSTANCE_NAME_MAX_CHARS};
+
+  #[test]
+  fn ui_instance_name_is_trimmed_and_length_limited() {
+    let config =
+      serde_json::from_value::<CoreConfig>(json!({})).unwrap();
+    assert_eq!(config.ui_instance_name, "");
+
+    let config = serde_json::from_value::<CoreConfig>(
+      json!({ "ui_instance_name": "  Leia  " }),
+    )
+    .unwrap();
+    assert_eq!(config.ui_instance_name, "Leia");
+
+    // The limit counts characters, not bytes.
+    let longest = "é".repeat(UI_INSTANCE_NAME_MAX_CHARS);
+    let config = serde_json::from_value::<CoreConfig>(
+      json!({ "ui_instance_name": longest }),
+    )
+    .unwrap();
+    assert_eq!(config.ui_instance_name, longest);
+
+    let too_long = "a".repeat(UI_INSTANCE_NAME_MAX_CHARS + 1);
+    assert!(
+      serde_json::from_value::<CoreConfig>(
+        json!({ "ui_instance_name": too_long }),
+      )
+      .is_err()
+    );
+    assert!(
+      serde_json::from_value::<Env>(
+        json!({ "komodo_ui_instance_name": too_long }),
+      )
+      .is_err()
+    );
+
+    let env = serde_json::from_value::<Env>(
+      json!({ "komodo_ui_instance_name": " ACF Infrastructure " }),
+    )
+    .unwrap();
+    assert_eq!(
+      env.komodo_ui_instance_name.as_deref(),
+      Some("ACF Infrastructure")
+    );
+    let env = serde_json::from_value::<Env>(json!({})).unwrap();
+    assert!(env.komodo_ui_instance_name.is_none());
+  }
+}
