@@ -34,7 +34,11 @@ const Topbar = ({
   return (
     <AppShell.Header
       renderRoot={(props) => (
-        <SimpleGrid cols={{ base: 2, lg: 3 }} {...props} />
+        <SimpleGrid
+          cols={{ base: 2, lg: 3 }}
+          {...props}
+          className={`${props.className ?? ""} komodo-topbar`}
+        />
       )}
       style={(theme) => ({
         borderColor: theme.colors["accent-border"][1],
@@ -53,6 +57,8 @@ const Topbar = ({
           renderRoot={(props) => <Link to="/" {...props} />}
           size="lg"
           hiddenFrom="md"
+          // On phones the instance name takes the logo's place.
+          visibleFrom={instance ? "xs" : undefined}
         >
           <img src="/mogh-512x512.png" width={32} alt="moghtech" />
         </ActionIcon>
@@ -73,6 +79,9 @@ const Topbar = ({
 
         {instance && (
           <Text
+            renderRoot={(props) => <Link to="/" {...props} />}
+            c="inherit"
+            td="none"
             fz={{ base: "md", md: "h3" }}
             fw="450"
             miw={0}

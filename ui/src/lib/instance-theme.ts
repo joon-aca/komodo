@@ -25,9 +25,7 @@ export const instanceName = () => uiConfig.instanceName;
 
 /** The app name, followed by the instance name when one is configured. */
 export const appName = () =>
-  uiConfig.instanceName
-    ? `${APP_NAME} · ${uiConfig.instanceName}`
-    : APP_NAME;
+  uiConfig.instanceName ? `${APP_NAME} · ${uiConfig.instanceName}` : APP_NAME;
 
 // This endpoint is public so the same presentation is available before login.
 // Older Core versions may return the SPA's HTML here; keep stock styling then.

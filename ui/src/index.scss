@@ -18,6 +18,14 @@ body[data-mantine-color-scheme="dark"] {
   background-color: var(--mantine-color-body);
 }
 
+// Below the three column layout the right area keeps its natural width, so a
+// long instance name truncates instead of running underneath it.
+@media (max-width: 74.99em) {
+  .komodo-topbar.komodo-topbar {
+    grid-template-columns: minmax(0, 1fr) auto;
+  }
+}
+
 .monaco-editor {
   position: absolute !important;
 }
