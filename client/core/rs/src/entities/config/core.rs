@@ -12,7 +12,7 @@
 use std::{collections::HashMap, path::PathBuf};
 
 use mogh_auth_client::config::NamedOauthConfig;
-use serde::{Deserialize, Serialize};
+use serde::{Deserialize, Deserializer, Serialize};
 
 use crate::{
   deserializers::option_string_list_deserializer,
@@ -71,6 +71,12 @@ pub struct Env {
   pub komodo_title: Option<String>,
   /// Override `ui_theme`
   pub komodo_ui_theme: Option<UiTheme>,
+  /// Override `ui_instance_name`
+  #[serde(
+    default,
+    deserialize_with = "option_ui_instance_name_deserializer"
+  )]
+  pub komodo_ui_instance_name: Option<String>,
   /// Override `host`
   pub komodo_host: Option<String>,
   /// Override `port`
@@ -331,6 +337,36 @@ pub enum UiTheme {
   Violet,
 }
 
+/// The maximum length of `ui_instance_name`, in characters.
+pub const UI_INSTANCE_NAME_MAX_CHARS: usize = 40;
+
+fn validate_ui_instance_name<E: serde::de::Error>(
+  name: String,
+) -> Result<String, E> {
+  let name = name.trim();
+  let chars = name.chars().count();
+  if chars > UI_INSTANCE_NAME_MAX_CHARS {
+    return Err(E::custom(format!(
+      "ui_instance_name is {chars} characters, the maximum is {UI_INSTANCE_NAME_MAX_CHARS}"
+    )));
+  }
+  Ok(name.to_string())
+}
+
+fn ui_instance_name_deserializer<'de, D: Deserializer<'de>>(
+  deserializer: D,
+) -> Result<String, D::Error> {
+  validate_ui_instance_name(String::deserialize(deserializer)?)
+}
+
+fn option_ui_instance_name_deserializer<'de, D: Deserializer<'de>>(
+  deserializer: D,
+) -> Result<Option<String>, D::Error> {
+  Option::<String>::deserialize(deserializer)?
+    .map(validate_ui_instance_name)
+    .transpose()
+}
+
 /// # Core Configuration File
 ///
 /// The Core API initializes it's configuration by reading the environment,
@@ -358,6 +394,15 @@ pub struct CoreConfig {
   /// Applies before login and in both light and dark mode.
   #[serde(default)]
   pub ui_theme: UiTheme,
+
+  /// Optional name identifying this instance, shown on the login page
+  /// and beside the logo in the header. It is public: anyone who can
+  /// reach the login page can read it. At most 40 characters.
+  #[serde(
+    default,
+    deserialize_with = "ui_instance_name_deserializer"
+  )]
+  pub ui_instance_name: String,
 
   /// The host to use with oauth redirect url, whatever host
   /// the user hits to access Komodo. eg `https://komodo.domain.com`.
@@ -952,6 +997,7 @@ impl Default for CoreConfig {
     Self {
       title: default_title(),
       ui_theme: Default::default(),
+      ui_instance_name: Default::default(),
       host: default_host(),
       port: default_core_port(),
       bind_ip: default_core_bind_ip(),
@@ -1038,6 +1084,7 @@ impl CoreConfig {
     CoreConfig {
       title: config.title,
       ui_theme: config.ui_theme,
+      ui_instance_name: config.ui_instance_name,
       host: config.host,
       port: config.port,
       bind_ip: config.bind_ip,

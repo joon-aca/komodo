@@ -33,6 +33,14 @@ title = "Komodo"
 ## Default: "default"
 ui_theme = "default"
 
+## Optional name identifying this instance, eg "Leia" or "ACF Infrastructure".
+## Shown on the login page and beside the logo in the header.
+## It is public: anyone who can reach the login page can read it.
+## At most 40 characters. Leave empty for the stock login page and header.
+## Env: KOMODO_UI_INSTANCE_NAME
+## Default: empty
+ui_instance_name = ""
+
 ## This should be the url used to access Komodo in browser, potentially behind DNS.
 ## Eg https://komodo.example.com or http://12.34.56.78:9120. This should match the address configured in your Oauth app.
 ## Env: KOMODO_HOST
