@@ -52,5 +52,16 @@ the UI starts with stock colors. Development UI pointed at `VITE_KOMODO_HOST`
 reads that Core's palette as well.
 
 Status, tag and destructive-action colors retain their existing meanings. This
-setting does not customize logos, favicons or display names; `KOMODO_TITLE` keeps
-its existing browser-title behavior.
+setting does not customize logos or favicons.
+
+## Instance name
+
+Set `KOMODO_UI_INSTANCE_NAME` on **Core** (or `ui_instance_name` in the Core
+configuration file) to name an instance, for example `Leia`. The name appears
+on the login page as `KOMODO · Leia` and beside the logo in the header. It is
+trimmed, limited to 40 characters, and Core refuses to start with a longer
+value. Leave it empty for the stock login page and header.
+
+The name is part of the public `GET /ui-config` response, so anyone who can
+reach the login page can read it. `KOMODO_TITLE` keeps its existing
+browser-title behavior and is independent of this setting.
