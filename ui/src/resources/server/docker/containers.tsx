@@ -23,6 +23,7 @@ export default function ServerContainers({
       pruneButton
       forceTall
       selectable
+      groupByComposeProject
     />
   );
 }
