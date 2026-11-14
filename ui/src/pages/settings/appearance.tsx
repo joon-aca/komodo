@@ -93,10 +93,16 @@ function AppearanceForm({ appearance }: { appearance: Types.Appearance }) {
               disabled={appearance.ui_theme_from_env}
               radius="md"
               p="md"
+              // The palette's own accent is too faint to mark the choice.
+              style={
+                option.value === theme
+                  ? { borderColor: "var(--mantine-color-green-filled)" }
+                  : undefined
+              }
             >
               <Stack gap="sm">
                 <Group gap="sm" wrap="nowrap">
-                  <Radio.Indicator />
+                  <Radio.Indicator color="green" />
                   <Text fw={500}>{option.label}</Text>
                 </Group>
                 <Group gap="xs" grow>
