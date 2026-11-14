@@ -22,11 +22,18 @@ import TagsFilter from "@/components/tags/filter";
 import ResourceMultiSelector from "@/resources/multi-selector";
 import ListPagination from "@/components/list-pagination";
 import DockerBatchExecutions from "@/components/docker/batch-executions";
+import FleetContainers from "@/components/docker/fleet-containers";
+import {
+  ContainersViewToggle,
+  useContainersView,
+} from "@/components/docker/container-groups";
 
 const CONTAINER_SORT_KEYS = Object.values(Types.ContainerSortBy);
 
 export default function Containers() {
   const [selectedServers, setSelectedServers] = useState<string[]>([]);
+  const [view] = useContainersView();
+  const grouped = view === "Grouped";
 
   const selectionState = useDockerSelectionState("Container");
 
@@ -62,9 +69,36 @@ export default function Containers() {
         sort_desc: sort.sort_desc,
       },
       {
+        enabled: !grouped,
         refetchInterval: 15_000,
         // Keep the previous rows visible while fetching after a query key
         // change (page / sort / search / filters) to prevent table flashing.
+        placeholderData: keepPreviousData,
+      },
+    ).data ?? [];
+
+  // The grouped view shows every container of the filtered servers, and
+  // searches server, project and container names in the browser. The list
+  // comes from the Core status cache, so it is one cheap request.
+  const allContainers =
+    useRead(
+      "ListAllContainers",
+      { servers: selectedServers, tags, limit: 0 },
+      {
+        enabled: grouped,
+        refetchInterval: 15_000,
+        placeholderData: keepPreviousData,
+      },
+    ).data ?? [];
+  // Listed separately so servers without containers,
+  // or which are unreachable, still show as a group.
+  const servers =
+    useRead(
+      "ListServers",
+      { query: { names: selectedServers, tags }, limit: 0 },
+      {
+        enabled: grouped,
+        refetchInterval: 15_000,
         placeholderData: keepPreviousData,
       },
     ).data ?? [];
@@ -257,11 +291,14 @@ export default function Containers() {
               onChange={setSelectedServers}
             />
             <DockerBatchExecutions type="Container" />
-            <ListPagination
-              page={page}
-              setPage={setPage}
-              count={containers.length}
-            />
+            <ContainersViewToggle />
+            {!grouped && (
+              <ListPagination
+                page={page}
+                setPage={setPage}
+                count={containers.length}
+              />
+            )}
           </Group>
 
           <Group w={{ base: "100%", xs: "fit-content" }}>
@@ -270,7 +307,15 @@ export default function Containers() {
           </Group>
         </Group>
 
-        {Table}
+        {grouped ? (
+          <FleetContainers
+            servers={servers}
+            containers={allContainers}
+            terms={terms}
+          />
+        ) : (
+          Table
+        )}
       </Stack>
     </Page>
   );

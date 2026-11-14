@@ -1,0 +1,161 @@
+import { useDockerSelectionState } from "@/lib/hooks";
+import { DataTable, SortableHeader } from "mogh_ui";
+import { Types } from "komodo_client";
+import DockerResourceLink from "./link";
+import { StatusBadge } from "mogh_ui";
+import { containerStateIntention } from "@/lib/color";
+import ContainerPorts from "@/components/docker/container-ports";
+import { DividedChildren } from "mogh_ui";
+
+export interface ContainersTableProps {
+  serverId: string;
+  containers: Types.ListContainersResponse;
+  /** Enables multi select of containers for batch executions. */
+  selectable?: boolean;
+  forceTall?: boolean;
+  /** The table is one of several under a server or Compose project. */
+  grouped?: boolean;
+}
+
+export default function ContainersTable({
+  containers,
+  serverId,
+  selectable,
+  forceTall,
+  grouped,
+}: ContainersTableProps) {
+  const selectionState = useDockerSelectionState("Container");
+  return (
+    <DataTable
+      mih={forceTall ? "60vh" : undefined}
+      tableKey={grouped ? "server-containers-by-project" : "server-containers"}
+      data={containers}
+      selectOptions={
+        selectable
+          ? {
+              selectKey: ({ name }) => `${serverId} ${name}`,
+              state: selectionState,
+            }
+          : undefined
+      }
+      columns={[
+        {
+          accessorKey: "name",
+          header: ({ column }) => (
+            <SortableHeader column={column} title="Name" />
+          ),
+          cell: ({ row }) => (
+            <DockerResourceLink
+              type="Container"
+              serverId={serverId}
+              name={row.original.name}
+            />
+          ),
+        },
+        {
+          accessorKey: "state",
+          header: ({ column }) => (
+            <SortableHeader column={column} title="State" />
+          ),
+          cell: ({ row }) => {
+            const state = row.original?.state;
+            return (
+              <StatusBadge
+                text={state}
+                intent={containerStateIntention(state)}
+              />
+            );
+          },
+        },
+        {
+          accessorKey: "image",
+          header: ({ column }) => (
+            <SortableHeader column={column} title="Image" />
+          ),
+          cell: ({ row }) => (
+            <DockerResourceLink
+              type="Image"
+              serverId={serverId}
+              name={row.original.image}
+              id={row.original.image_id}
+            />
+          ),
+        },
+        {
+          accessorKey: "networks.0",
+          header: ({ column }) => (
+            <SortableHeader column={column} title="Networks" />
+          ),
+          cell: ({ row }) =>
+            (row.original.networks?.length ?? 0) > 0 ? (
+              <DividedChildren wrap="nowrap">
+                {row.original.networks?.map((network) => (
+                  <DockerResourceLink
+                    key={network}
+                    type="Network"
+                    serverId={serverId}
+                    name={network}
+                  />
+                ))}
+              </DividedChildren>
+            ) : (
+              row.original.network_mode && (
+                <DockerResourceLink
+                  type="Network"
+                  serverId={serverId}
+                  name={row.original.network_mode}
+                />
+              )
+            ),
+        },
+        {
+          accessorKey: "ports.0",
+          sortFn: (a, b) => {
+            const getMinHostPort = (row: typeof a) => {
+              const ports = row.original.ports ?? [];
+              if (!ports.length) return Number.POSITIVE_INFINITY;
+              const nums = ports
+                .map((p) => p.PublicPort)
+                .filter((p): p is number => typeof p === "number")
+                .map((n) => Number(n));
+              if (!nums.length || nums.some((n) => Number.isNaN(n))) {
+                return Number.POSITIVE_INFINITY;
+              }
+              return Math.min(...nums);
+            };
+            const pa = getMinHostPort(a);
+            const pb = getMinHostPort(b);
+            return pa === pb ? 0 : pa > pb ? 1 : -1;
+          },
+          header: ({ column }) => (
+            <SortableHeader column={column} title="Ports" />
+          ),
+          cell: ({ row }) => (
+            <ContainerPorts
+              ports={row.original.ports ?? []}
+              serverId={row.original.server_id}
+            />
+          ),
+        },
+        {
+          accessorKey: "volumes.0",
+          header: ({ column }) => (
+            <SortableHeader column={column} title="Volumes" />
+          ),
+          cell: ({ row }) => (
+            <DividedChildren wrap="nowrap">
+              {row.original.volumes?.map((volume) => (
+                <DockerResourceLink
+                  key={volume}
+                  type="Volume"
+                  serverId={row.original.server_id!}
+                  name={volume}
+                />
+              ))}
+            </DividedChildren>
+          ),
+        },
+      ]}
+    />
+  );
+}
