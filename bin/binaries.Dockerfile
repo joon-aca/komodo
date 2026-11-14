@@ -2,7 +2,7 @@
 ## for a specific architecture. Requires OpenSSL 3 or later.
 
 FROM rust:1.98.0-bookworm AS builder
-RUN cargo install cargo-strip cargo-edit
+RUN cargo install --locked --no-default-features --features set-version cargo-edit
 
 WORKDIR /builder
 COPY Cargo.toml Cargo.lock ./
@@ -20,11 +20,8 @@ ARG IMAGE_TAG=""
 RUN cargo set-version -p komodo_core ${VERSION}${IMAGE_TAG:+-${IMAGE_TAG}}
 
 # Compile bin
-RUN \
-  cargo build -p komodo_core --release && \
-  cargo build -p komodo_periphery --release && \
-  cargo build -p komodo_cli --release && \
-  cargo strip
+RUN cargo build --release -p komodo_core -p komodo_periphery -p komodo_cli && \
+  strip target/release/core target/release/periphery target/release/km
 
 # Copy just the binaries to scratch image
 FROM scratch

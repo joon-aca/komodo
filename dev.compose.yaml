@@ -3,6 +3,8 @@ services:
     build:
       context: .
       dockerfile: bin/core/aio.Dockerfile
+      args:
+        BUILD_PROFILE: ${KOMODO_BUILD_PROFILE:-release}
     restart: unless-stopped
     logging:
       driver: local
@@ -21,6 +23,8 @@ services:
     build:
       context: .
       dockerfile: bin/periphery/aio.Dockerfile
+      args:
+        BUILD_PROFILE: ${KOMODO_BUILD_PROFILE:-release}
     restart: unless-stopped
     logging:
       driver: local

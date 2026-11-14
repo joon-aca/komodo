@@ -24,6 +24,8 @@ Running Komodo from [source](https://github.com/moghtech/komodo) requires either
 
 After making changes to the project, run `run dev-compose-build` to rebuild Komodo and then `run dev-compose-exposed` to start a Komodo container with the UI accessible at `localhost:9120`. Any changes made to source files will require re-running the `dev-compose-build` and `dev-compose-exposed` commands.
 
+For faster iteration with Server or URL builders, run `KOMODO_BUILD_PROFILE=dev run dev-compose-build`. This builds unoptimized containers and omits EC2 builder support from Core. The default Compose build includes AWS support.
+
 ## Devcontainer
 
 Use the included `.devcontainer.json` with VSCode or other compatible IDE to stand-up a full environment, including database, with one click.
@@ -103,8 +105,11 @@ In separate terminals, run Core, Periphery, and UI.
 run dev-core
 ```
 
+For a faster local Core build that skips the EC2 SDK, use `cargo core-dev`. To run it with the local configuration, use `KOMODO_CONFIG_PATH=.dev/core.config.toml cargo run -p komodo_core --no-default-features`.
+
 ```sh
 run dev-periphery
+```
 
 ```sh
 run dev-ui      # Start in dev (watch) mode

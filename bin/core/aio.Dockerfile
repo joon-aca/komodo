@@ -1,8 +1,13 @@
+# syntax=docker/dockerfile:1
+
 ## All in one, multi stage compile + runtime Docker build for your architecture.
 
 # Build Core
 FROM rust:1.98.0-trixie AS core-builder
-RUN cargo install cargo-strip cargo-edit
+ENV CARGO_HOME=/var/cache/cargo
+RUN --mount=type=cache,target=/var/cache/cargo \
+    cargo install --locked --no-default-features --features set-version \
+      --root /usr/local/cargo cargo-edit
 
 WORKDIR /builder
 COPY Cargo.toml Cargo.lock ./
@@ -13,15 +18,33 @@ COPY ./bin/core ./bin/core
 COPY ./bin/cli ./bin/cli
 COPY ./xtask ./xtask
 
-# Set Version
 ARG VERSION="0.0.0"
 ARG IMAGE_TAG=""
-RUN cargo set-version -p komodo_core ${VERSION}${IMAGE_TAG:+-${IMAGE_TAG}}
 
-# Compile app
-RUN cargo build -p komodo_core --release && \
-  cargo build -p komodo_cli --release && \
-  cargo strip
+# The opt-in dev profile skips the EC2 SDK and release optimizations.
+ARG BUILD_PROFILE=release
+ARG TARGETPLATFORM
+
+RUN --mount=type=cache,target=/var/cache/cargo \
+    --mount=type=cache,id=komodo-core-target-${TARGETPLATFORM},target=/builder/target,sharing=locked \
+    <<EOF
+set -eux
+cargo set-version -p komodo_core "${VERSION}${IMAGE_TAG:+-${IMAGE_TAG}}"
+# Cargo checks local source timestamps against its cached build artifacts.
+find bin client lib xtask -type f -exec touch {} +
+mkdir -p /out
+if [ "$BUILD_PROFILE" = "release" ]; then
+  cargo build --release -p komodo_core -p komodo_cli
+  cp target/release/core target/release/km /out/
+  strip /out/core /out/km
+elif [ "$BUILD_PROFILE" = "dev" ]; then
+  cargo build -p komodo_core -p komodo_cli --no-default-features
+  cp target/debug/core target/debug/km /out/
+else
+  echo "BUILD_PROFILE must be release or dev, got $BUILD_PROFILE" >&2
+  exit 1
+fi
+EOF
 
 # Build UI
 FROM node:22.12-alpine AS ui-builder
@@ -44,8 +67,8 @@ WORKDIR /app
 # Copy
 COPY ./config/core.config.toml /config/.default.config.toml
 COPY --from=ui-builder /builder/ui/dist /app/ui
-COPY --from=core-builder /builder/target/release/core /usr/local/bin/core
-COPY --from=core-builder /builder/target/release/km /usr/local/bin/km
+COPY --from=core-builder /out/core /usr/local/bin/core
+COPY --from=core-builder /out/km /usr/local/bin/km
 COPY --from=denoland/deno:bin /deno /usr/local/bin/deno
 
 # Set $DENO_DIR and preload external Deno deps

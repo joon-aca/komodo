@@ -12,11 +12,12 @@ COPY . .
 RUN cargo chef prepare --recipe-path recipe.json
 
 FROM chef AS builder
-RUN cargo install cargo-strip cargo-edit
+RUN cargo install --locked --no-default-features --features set-version cargo-edit
 
 # Build JUST dependencies - cached layer
 COPY --from=planner /builder/recipe.json recipe.json
-RUN cargo chef cook --release --recipe-path recipe.json
+RUN cargo chef cook --release --locked --recipe-path recipe.json \
+    -p komodo_core -p komodo_periphery -p komodo_cli
 
 # NOW copy again (this time into builder), set version, and build app
 COPY . .
@@ -26,11 +27,9 @@ ARG VERSION="0.0.0"
 ARG IMAGE_TAG=""
 RUN cargo set-version -p komodo_core ${VERSION}${IMAGE_TAG:+-${IMAGE_TAG}}
 
-RUN \
-  cargo build --release --bin core && \
-  cargo build --release --bin periphery && \
-  cargo build --release --bin km && \
-  cargo strip
+RUN find bin client lib xtask -type f -exec touch {} + && \
+  cargo build --release -p komodo_core -p komodo_periphery -p komodo_cli && \
+  strip target/release/core target/release/periphery target/release/km
 
 # Copy just the binaries to scratch image
 FROM scratch
