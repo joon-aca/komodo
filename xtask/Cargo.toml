@@ -12,3 +12,6 @@ anyhow = { workspace = true }
 
 schemars = { workspace = true }
 komodo_client = { workspace = true, features = ["schemars"] }
+
+[lints]
+workspace = true

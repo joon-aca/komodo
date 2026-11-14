@@ -2,28 +2,32 @@ use std::{collections::HashMap, time::Duration};
 
 use anyhow::{Context, anyhow};
 use database::mungos::mongodb::bson::oid::ObjectId;
+#[cfg(feature = "aws")]
 use formatting::muted;
 use futures_util::{StreamExt, stream::FuturesOrdered};
+#[cfg(feature = "aws")]
+use komodo_client::entities::komodo_timestamp;
+#[cfg(feature = "aws")]
+use komodo_client::entities::update::Log;
 use komodo_client::entities::{
   Version,
   builder::{AwsBuilderConfig, Builder, BuilderConfig},
-  komodo_timestamp,
   server::{Server, ServerState},
-  update::{Log, Update},
+  update::Update,
 };
+#[cfg(feature = "aws")]
 use periphery_client::api::{self, GetVersionResponse};
 use tokio::sync::Mutex;
 
+#[cfg(feature = "aws")]
+use crate::cloud::aws::ec2::{
+  Ec2Instance, launch_ec2_instance, terminate_ec2_instance_with_retry,
+};
+#[cfg(feature = "aws")]
+use crate::helpers::update::update_update;
 use crate::{
-  cloud::{
-    BuildCleanupData,
-    aws::ec2::{
-      Ec2Instance, launch_ec2_instance,
-      terminate_ec2_instance_with_retry,
-    },
-  },
+  cloud::BuildCleanupData,
   connection::PeripheryConnectionArgs,
-  helpers::update::update_update,
   periphery::PeripheryClient,
   resource,
   state::{builder_usage_cache, server_status_cache},
@@ -31,7 +35,9 @@ use crate::{
 
 use super::periphery_client;
 
+#[cfg(feature = "aws")]
 const BUILDER_POLL_RATE_SECS: u64 = 2;
+#[cfg(feature = "aws")]
 const BUILDER_POLL_MAX_TRIES: usize = 60;
 
 #[instrument(
@@ -132,6 +138,7 @@ pub async fn connect_builder_periphery(
   }
 }
 
+#[cfg(feature = "aws")]
 #[instrument(
   "GetAwsBuilder",
   skip_all,
@@ -234,6 +241,18 @@ async fn get_aws_builder(
   )
 }
 
+#[cfg(not(feature = "aws"))]
+async fn get_aws_builder(
+  _resource_name: &str,
+  _version: Option<Version>,
+  _config: AwsBuilderConfig,
+  _update: Option<&mut Update>,
+) -> anyhow::Result<(PeripheryClient, BuildCleanupData)> {
+  Err(anyhow!(
+    "AWS builders are unavailable in this build. Rebuild Core with its default features."
+  ))
+}
+
 #[instrument(
   "CleanupBuilderInstance",
   skip_all,
@@ -259,6 +278,7 @@ pub async fn cleanup_builder_instance(
     BuildCleanupData::Url => {
       periphery.cleanup().await;
     }
+    #[cfg(feature = "aws")]
     BuildCleanupData::Aws {
       instance_id,
       region,
@@ -278,6 +298,7 @@ pub async fn cleanup_builder_instance(
   }
 }
 
+#[cfg(feature = "aws")]
 pub fn start_aws_builder_log(
   instance_id: &str,
   ip: &str,

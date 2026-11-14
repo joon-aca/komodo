@@ -12,3 +12,6 @@ komodo_client.workspace = true
 svi.workspace = true
 #
 anyhow.workspace = true
+
+[lints]
+workspace = true

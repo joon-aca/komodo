@@ -12,10 +12,10 @@ use encoding::{
   CastBytes as _, Decode as _, EncodedJsonMessage, EncodedResponse,
   WithChannel,
 };
+#[cfg(feature = "aws")]
+use komodo_client::entities::builder::AwsBuilderConfig;
 use komodo_client::entities::{
-  builder::{AwsBuilderConfig, UrlBuilderConfig},
-  optional_str,
-  server::Server,
+  builder::UrlBuilderConfig, optional_str, server::Server,
 };
 use mogh_cache::CloneCache;
 use mogh_error::serror_into_anyhow_error;
@@ -176,6 +176,7 @@ impl<'a> PeripheryConnectionArgs<'a> {
     }
   }
 
+  #[cfg(feature = "aws")]
   pub fn from_aws_builder(
     id: &'a str,
     address: &'a str,

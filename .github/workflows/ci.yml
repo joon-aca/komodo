@@ -34,10 +34,13 @@ jobs:
       #       ${{ runner.os }}-cargo-
 
       - name: Build
-        run: cargo build --verbose
+        run: cargo build --locked --verbose
 
       - name: Run tests
-        run: cargo test --verbose
+        run: cargo test --locked --verbose
+
+      - name: Check Core without AWS builders
+        run: cargo check --locked -p komodo_core --no-default-features --verbose
 
   fmt:
     name: Format

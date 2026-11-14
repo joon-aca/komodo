@@ -59,3 +59,6 @@ bson.workspace = true
 clap.workspace = true
 envy.workspace = true
 rand.workspace = true
+
+[lints]
+workspace = true

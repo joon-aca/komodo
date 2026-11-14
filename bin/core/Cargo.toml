@@ -10,7 +10,15 @@ repository.workspace = true
 name = "core"
 path = "src/main.rs"
 
-# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+# Omit the EC2 SDK for local development with `cargo core-dev`.
+[features]
+default = ["aws"]
+aws = [
+  "dep:aws-config",
+  "dep:aws-credential-types",
+  "dep:aws-sdk-ec2",
+  "dep:data-encoding",
+]
 
 [dependencies]
 # local
@@ -42,15 +50,15 @@ toml_pretty.workspace = true
 slack.workspace = true
 svi.workspace = true
 # external
-aws-credential-types.workspace = true
+aws-credential-types = { workspace = true, optional = true }
 english-to-cron.workspace = true
-data-encoding.workspace = true
+data-encoding = { workspace = true, optional = true }
 serde_yaml_ng.workspace = true
 utoipa-scalar.workspace = true
 futures-util.workspace = true
-aws-sdk-ec2.workspace = true
+aws-sdk-ec2 = { workspace = true, optional = true }
 urlencoding.workspace = true
-aws-config.workspace = true
+aws-config = { workspace = true, optional = true }
 tokio-util.workspace = true
 axum-extra.workspace = true
 serde_json.workspace = true
@@ -83,3 +91,6 @@ hmac.workspace = true
 sha2.workspace = true
 hex.workspace = true
 url.workspace = true
+
+[lints]
+workspace = true

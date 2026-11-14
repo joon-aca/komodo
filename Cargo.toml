@@ -140,3 +140,18 @@ regex = "1.13.1"
 
 [profile.release]
 strip = "debuginfo"
+
+# The generated EC2 client is expensive to optimize and wraps network I/O.
+[profile.release.package.aws-sdk-ec2]
+opt-level = 1
+
+# Keep source locations in workspace backtraces with less debug data.
+[profile.dev]
+debug = "line-tables-only"
+
+# Workspace packages retain line tables. External dependencies omit them.
+[profile.dev.package."*"]
+debug = false
+
+[workspace.lints.rust]
+unused_crate_dependencies = "warn"
