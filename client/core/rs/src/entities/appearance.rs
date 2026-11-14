@@ -1,7 +1,19 @@
 use serde::{Deserialize, Serialize};
 use typeshare::typeshare;
 
-use super::config::core::UiTheme;
+/// Instance background palette, independent of the user's light/dark mode.
+#[typeshare]
+#[derive(
+  Debug, Clone, Copy, Default, Serialize, Deserialize, PartialEq, Eq,
+)]
+#[cfg_attr(feature = "utoipa", derive(utoipa::ToSchema))]
+#[serde(rename_all = "lowercase")]
+pub enum UiTheme {
+  #[default]
+  Default,
+  Blue,
+  Violet,
+}
 
 /// The name of the single [AppearanceSettings] document.
 pub const APPEARANCE_SETTINGS_NAME: &str = "appearance";

@@ -2,9 +2,7 @@ use mogh_resolver::Resolve;
 use serde::{Deserialize, Serialize};
 use typeshare::typeshare;
 
-use crate::entities::{
-  appearance::Appearance, config::core::UiTheme,
-};
+use crate::entities::appearance::{Appearance, UiTheme};
 
 use super::KomodoWriteRequest;
 

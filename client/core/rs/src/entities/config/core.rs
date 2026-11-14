@@ -13,8 +13,8 @@ use std::{collections::HashMap, path::PathBuf};
 
 use mogh_auth_client::config::NamedOauthConfig;
 use serde::{Deserialize, Deserializer, Serialize};
-use typeshare::typeshare;
 
+pub use crate::entities::appearance::UiTheme;
 use crate::{
   deserializers::option_string_list_deserializer,
   entities::{
@@ -324,20 +324,6 @@ pub struct Env {
 
 fn default_core_config_paths() -> Vec<PathBuf> {
   vec![PathBuf::from("/config")]
-}
-
-/// Instance background palette, independent of the user's light/dark mode.
-#[typeshare]
-#[derive(
-  Debug, Clone, Copy, Default, Serialize, Deserialize, PartialEq, Eq,
-)]
-#[cfg_attr(feature = "utoipa", derive(utoipa::ToSchema))]
-#[serde(rename_all = "lowercase")]
-pub enum UiTheme {
-  #[default]
-  Default,
-  Blue,
-  Violet,
 }
 
 /// The maximum length of `ui_instance_name`, in characters.
