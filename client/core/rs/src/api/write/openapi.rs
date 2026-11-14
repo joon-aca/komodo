@@ -91,6 +91,8 @@ use crate::api::write;
     write::refresh_resource_sync_pending,
     write::write_sync_file_contents,
     write::commit_sync,
+    // appearance
+    write::update_appearance,
     // variable
     write::create_variable,
     write::update_variable_value,

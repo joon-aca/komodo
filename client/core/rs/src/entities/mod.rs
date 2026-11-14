@@ -29,6 +29,8 @@ pub mod alert;
 pub mod alerter;
 /// Subtypes of [ApiKey][api_key::ApiKey].
 pub mod api_key;
+/// Subtypes of [Appearance][appearance::Appearance].
+pub mod appearance;
 /// Subtypes of [Build][build::Build].
 pub mod build;
 /// Subtypes of [Builder][builder::Builder].
@@ -1355,6 +1357,9 @@ pub enum Operation {
   GlobalAutoUpdate,
   RotateAllServerKeys,
   RotateCoreKeys,
+
+  // Appearance
+  UpdateAppearance,
 
   // Variable
   CreateVariable,

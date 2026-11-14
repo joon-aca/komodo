@@ -13,6 +13,7 @@ use std::{collections::HashMap, path::PathBuf};
 
 use mogh_auth_client::config::NamedOauthConfig;
 use serde::{Deserialize, Deserializer, Serialize};
+use typeshare::typeshare;
 
 use crate::{
   deserializers::option_string_list_deserializer,
@@ -326,9 +327,11 @@ fn default_core_config_paths() -> Vec<PathBuf> {
 }
 
 /// Instance background palette, independent of the user's light/dark mode.
+#[typeshare]
 #[derive(
   Debug, Clone, Copy, Default, Serialize, Deserialize, PartialEq, Eq,
 )]
+#[cfg_attr(feature = "utoipa", derive(utoipa::ToSchema))]
 #[serde(rename_all = "lowercase")]
 pub enum UiTheme {
   #[default]
@@ -340,15 +343,18 @@ pub enum UiTheme {
 /// The maximum length of `ui_instance_name`, in characters.
 pub const UI_INSTANCE_NAME_MAX_CHARS: usize = 40;
 
-fn validate_ui_instance_name<E: serde::de::Error>(
-  name: String,
-) -> Result<String, E> {
+/// Trims an instance name and checks it against
+/// [UI_INSTANCE_NAME_MAX_CHARS]. Every source of the name goes through
+/// this: the config file, the environment and the saved appearance.
+pub fn validate_ui_instance_name(
+  name: &str,
+) -> Result<String, String> {
   let name = name.trim();
   let chars = name.chars().count();
   if chars > UI_INSTANCE_NAME_MAX_CHARS {
-    return Err(E::custom(format!(
+    return Err(format!(
       "ui_instance_name is {chars} characters, the maximum is {UI_INSTANCE_NAME_MAX_CHARS}"
-    )));
+    ));
   }
   Ok(name.to_string())
 }
@@ -356,15 +362,17 @@ fn validate_ui_instance_name<E: serde::de::Error>(
 fn ui_instance_name_deserializer<'de, D: Deserializer<'de>>(
   deserializer: D,
 ) -> Result<String, D::Error> {
-  validate_ui_instance_name(String::deserialize(deserializer)?)
+  validate_ui_instance_name(&String::deserialize(deserializer)?)
+    .map_err(serde::de::Error::custom)
 }
 
 fn option_ui_instance_name_deserializer<'de, D: Deserializer<'de>>(
   deserializer: D,
 ) -> Result<Option<String>, D::Error> {
   Option::<String>::deserialize(deserializer)?
-    .map(validate_ui_instance_name)
+    .map(|name| validate_ui_instance_name(&name))
     .transpose()
+    .map_err(serde::de::Error::custom)
 }
 
 /// # Core Configuration File

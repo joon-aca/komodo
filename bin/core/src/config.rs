@@ -105,6 +105,24 @@ pub fn monitoring_interval() -> async_timing_util::Timelength {
   })
 }
 
+/// Which appearance settings the environment sets. Each also overrides
+/// the value saved in Settings, which is shown there as locked.
+#[derive(Debug, Clone, Copy, Default)]
+pub struct UiEnvOverrides {
+  /// `KOMODO_UI_THEME` is set.
+  pub theme: bool,
+  /// `KOMODO_UI_INSTANCE_NAME` is set.
+  pub instance_name: bool,
+}
+
+static UI_ENV_OVERRIDES: OnceLock<UiEnvOverrides> = OnceLock::new();
+
+pub fn ui_env_overrides() -> UiEnvOverrides {
+  // Recorded while the environment is read for the config.
+  core_config();
+  UI_ENV_OVERRIDES.get().copied().unwrap_or_default()
+}
+
 pub fn core_config() -> &'static CoreConfig {
   static CORE_CONFIG: OnceLock<CoreConfig> = OnceLock::new();
   CORE_CONFIG.get_or_init(|| {
@@ -116,6 +134,10 @@ pub fn core_config() -> &'static CoreConfig {
         panic!("{e:?}");
       }
     };
+    let _ = UI_ENV_OVERRIDES.set(UiEnvOverrides {
+      theme: env.komodo_ui_theme.is_some(),
+      instance_name: env.komodo_ui_instance_name.is_some(),
+    });
     let config = if env.komodo_config_paths.is_empty() {
       println!(
         "{}: No config paths found, using default config",

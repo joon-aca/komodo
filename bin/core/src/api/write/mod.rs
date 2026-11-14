@@ -21,6 +21,7 @@ use super::Variant;
 mod action;
 mod alert;
 mod alerter;
+mod appearance;
 mod build;
 mod builder;
 mod deployment;
@@ -199,6 +200,9 @@ pub enum WriteRequest {
   DeleteTag(DeleteTag),
   RenameTag(RenameTag),
   UpdateTagColor(UpdateTagColor),
+
+  // ==== APPEARANCE ====
+  UpdateAppearance(UpdateAppearance),
 
   // ==== VARIABLE ====
   CreateVariable(CreateVariable),

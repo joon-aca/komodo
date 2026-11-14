@@ -10,6 +10,7 @@ use crate::config::{core_config, core_keys};
 
 mod alert;
 mod api;
+mod appearance;
 mod auth;
 mod cloud;
 mod config;
@@ -59,6 +60,8 @@ async fn app() -> anyhow::Result<()> {
     let _ = &auth::JWT_PROVIDER;
     // Init db_client check to crash on db init failure
     state::init_db_client().await;
+    // The saved appearance applies from the first request.
+    appearance::load_saved_appearance().await;
     // Run after db connection.
     startup::on_startup().await;
 
