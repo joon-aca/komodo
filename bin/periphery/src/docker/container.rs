@@ -35,10 +35,15 @@ impl DockerClient {
           .context("no names on container (empty vec)")?
           .replace('/', "");
         let stats = stats.get(&name).cloned();
+        let labels = container.labels.unwrap_or_default();
         anyhow::Ok(ContainerListItem {
           server_id: None,
           server_name: None,
           name,
+          compose_project: labels
+            .get("com.docker.compose.project")
+            .filter(|project| !project.is_empty())
+            .cloned(),
           stats,
           id: container.id,
           image: container.image,
@@ -79,7 +84,7 @@ impl DockerClient {
                 .collect()
             })
             .unwrap_or_default(),
-          labels: container.labels.unwrap_or_default(),
+          labels,
         })
       })
       .collect::<Vec<_>>();

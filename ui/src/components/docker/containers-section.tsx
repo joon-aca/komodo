@@ -1,19 +1,19 @@
-import { useDockerSelectionState, useRead } from "@/lib/hooks";
+import { useRead } from "@/lib/hooks";
 import { filterBySplit } from "mogh_ui";
 import { Prune } from "@/resources/server/executions";
 import DockerBatchExecutions from "./batch-executions";
 import { ICONS } from "@/lib/icons";
-import { DataTable, SortableHeader } from "mogh_ui";
 import { Section, SectionProps } from "mogh_ui";
 import { ShowHideButton } from "mogh_ui";
-import { Group } from "@mantine/core";
+import { Group, Text } from "@mantine/core";
 import { Types } from "komodo_client";
-import DockerResourceLink from "./link";
-import { StatusBadge } from "mogh_ui";
-import { containerStateIntention } from "@/lib/color";
-import ContainerPorts from "@/components/docker/container-ports";
 import { SearchInput } from "mogh_ui";
-import { DividedChildren } from "mogh_ui";
+import ContainersTable from "./containers-table";
+import {
+  ComposeProjectGroups,
+  ContainersViewToggle,
+  useContainersView,
+} from "./container-groups";
 
 export interface ContainersSectionProps extends SectionProps {
   serverId: string;
@@ -25,6 +25,9 @@ export interface ContainersSectionProps extends SectionProps {
   _search?: [string, (search: string) => void];
   /** Enables multi select of containers for batch executions. */
   selectable?: boolean;
+  /** Offers the grouped view, which is the default. It needs at least
+   * one container with a Compose project reported by its Periphery. */
+  groupByComposeProject?: boolean;
 }
 
 export default function ContainersSection({
@@ -36,17 +39,26 @@ export default function ContainersSection({
   forceTall,
   _search,
   selectable,
+  groupByComposeProject,
   titleOther,
   ...sectionProps
 }: ContainersSectionProps) {
-  const selectionState = useDockerSelectionState("Container");
+  const [view] = useContainersView();
+  const canGroup =
+    groupByComposeProject &&
+    containers.some((container) => container.compose_project);
+  const showGroups = canGroup && view === "Grouped";
   const allRunning = useRead("ListContainers", {
     server: serverId,
   }).data?.every(
     (container) => container.state === Types.ContainerStateStatusEnum.Running,
   );
   const filtered = _search
-    ? filterBySplit(containers, _search[0], (container) => container.name)
+    ? filterBySplit(containers, _search[0], (container) =>
+        showGroups
+          ? `${container.name} ${container.compose_project ?? ""}`
+          : container.name,
+      )
     : containers;
 
   return (
@@ -61,9 +73,11 @@ export default function ContainersSection({
           {(selectable ||
             (pruneButton && !allRunning) ||
             _search ||
-            setShow) && (
+            setShow ||
+            canGroup) && (
             <Group justify="space-between">
               <Group>
+                {canGroup && <ContainersViewToggle />}
                 {selectable && <DockerBatchExecutions type="Container" />}
                 {pruneButton && !allRunning && (
                   <Prune serverId={serverId} type="Containers" />
@@ -79,137 +93,25 @@ export default function ContainersSection({
             </Group>
           )}
 
-          <DataTable
-            mih={forceTall ? "60vh" : undefined}
-            tableKey="server-containers"
-            data={filtered}
-            selectOptions={
-              selectable
-                ? {
-                    selectKey: ({ name }) => `${serverId} ${name}`,
-                    state: selectionState,
-                  }
-                : undefined
-            }
-            columns={[
-              {
-                accessorKey: "name",
-                header: ({ column }) => (
-                  <SortableHeader column={column} title="Name" />
-                ),
-                cell: ({ row }) => (
-                  <DockerResourceLink
-                    type="Container"
-                    serverId={serverId}
-                    name={row.original.name}
-                  />
-                ),
-              },
-              {
-                accessorKey: "state",
-                header: ({ column }) => (
-                  <SortableHeader column={column} title="State" />
-                ),
-                cell: ({ row }) => {
-                  const state = row.original?.state;
-                  return (
-                    <StatusBadge
-                      text={state}
-                      intent={containerStateIntention(state)}
-                    />
-                  );
-                },
-              },
-              {
-                accessorKey: "image",
-                header: ({ column }) => (
-                  <SortableHeader column={column} title="Image" />
-                ),
-                cell: ({ row }) => (
-                  <DockerResourceLink
-                    type="Image"
-                    serverId={serverId}
-                    name={row.original.image}
-                    id={row.original.image_id}
-                  />
-                ),
-              },
-              {
-                accessorKey: "networks.0",
-                header: ({ column }) => (
-                  <SortableHeader column={column} title="Networks" />
-                ),
-                cell: ({ row }) =>
-                  (row.original.networks?.length ?? 0) > 0 ? (
-                    <DividedChildren wrap="nowrap">
-                      {row.original.networks?.map((network) => (
-                        <DockerResourceLink
-                          key={network}
-                          type="Network"
-                          serverId={serverId}
-                          name={network}
-                        />
-                      ))}
-                    </DividedChildren>
-                  ) : (
-                    row.original.network_mode && (
-                      <DockerResourceLink
-                        type="Network"
-                        serverId={serverId}
-                        name={row.original.network_mode}
-                      />
-                    )
-                  ),
-              },
-              {
-                accessorKey: "ports.0",
-                sortFn: (a, b) => {
-                  const getMinHostPort = (row: typeof a) => {
-                    const ports = row.original.ports ?? [];
-                    if (!ports.length) return Number.POSITIVE_INFINITY;
-                    const nums = ports
-                      .map((p) => p.PublicPort)
-                      .filter((p): p is number => typeof p === "number")
-                      .map((n) => Number(n));
-                    if (!nums.length || nums.some((n) => Number.isNaN(n))) {
-                      return Number.POSITIVE_INFINITY;
-                    }
-                    return Math.min(...nums);
-                  };
-                  const pa = getMinHostPort(a);
-                  const pb = getMinHostPort(b);
-                  return pa === pb ? 0 : pa > pb ? 1 : -1;
-                },
-                header: ({ column }) => (
-                  <SortableHeader column={column} title="Ports" />
-                ),
-                cell: ({ row }) => (
-                  <ContainerPorts
-                    ports={row.original.ports ?? []}
-                    serverId={row.original.server_id}
-                  />
-                ),
-              },
-              {
-                accessorKey: "volumes.0",
-                header: ({ column }) => (
-                  <SortableHeader column={column} title="Volumes" />
-                ),
-                cell: ({ row }) => (
-                  <DividedChildren wrap="nowrap">
-                    {row.original.volumes?.map((volume) => (
-                      <DockerResourceLink
-                        key={volume}
-                        type="Volume"
-                        serverId={row.original.server_id!}
-                        name={volume}
-                      />
-                    ))}
-                  </DividedChildren>
-                ),
-              },
-            ]}
-          />
+          {showGroups ? (
+            filtered.length ? (
+              <ComposeProjectGroups
+                containers={filtered}
+                serverId={serverId}
+                selectable={selectable}
+                searching={!!_search?.[0]}
+              />
+            ) : (
+              <Text c="dimmed">No containers match your search.</Text>
+            )
+          ) : (
+            <ContainersTable
+              containers={filtered}
+              serverId={serverId}
+              selectable={selectable}
+              forceTall={forceTall}
+            />
+          )}
         </>
       )}
     </Section>
