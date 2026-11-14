@@ -133,6 +133,7 @@ export type ReadResponses = {
     ListUpdates: Types.ListUpdatesResponse;
     ListAlerts: Types.ListAlertsResponse;
     GetAlert: Types.GetAlertResponse;
+    GetAppearance: Types.GetAppearanceResponse;
     GetVariable: Types.GetVariableResponse;
     ListVariables: Types.ListVariablesResponse;
     GetGitProviderAccount: Types.GetGitProviderAccountResponse;
@@ -244,6 +245,7 @@ export type WriteResponses = {
     DeleteTag: Types.Tag;
     RenameTag: Types.Tag;
     UpdateTagColor: Types.Tag;
+    UpdateAppearance: Types.UpdateAppearanceResponse;
     CreateVariable: Types.CreateVariableResponse;
     UpdateVariableValue: Types.UpdateVariableValueResponse;
     UpdateVariableDescription: Types.UpdateVariableDescriptionResponse;

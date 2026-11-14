@@ -177,6 +177,9 @@ export type ReadResponses = {
   ListAlerts: Types.ListAlertsResponse;
   GetAlert: Types.GetAlertResponse;
 
+  // ==== APPEARANCE ====
+  GetAppearance: Types.GetAppearanceResponse;
+
   // ==== VARIABLE ====
   GetVariable: Types.GetVariableResponse;
   ListVariables: Types.ListVariablesResponse;
@@ -331,6 +334,9 @@ export type WriteResponses = {
   DeleteTag: Types.Tag;
   RenameTag: Types.Tag;
   UpdateTagColor: Types.Tag;
+
+  // ==== APPEARANCE ====
+  UpdateAppearance: Types.UpdateAppearanceResponse;
 
   // ==== VARIABLE ====
   CreateVariable: Types.CreateVariableResponse;
