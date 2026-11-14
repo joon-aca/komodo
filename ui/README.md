@@ -80,8 +80,9 @@ Each setting is resolved separately, in this order:
 3. The Core configuration file.
 4. The stock appearance.
 
-A setting the environment controls is shown as locked in the tab, and Core
-refuses to save it. Remove the variable and restart Core to change it in
+An empty `KOMODO_UI_INSTANCE_NAME` counts as unset. A setting the
+environment controls is shown as locked in the tab, and Core refuses to save
+it. Remove the variable and restart Core to change it in
 Settings. A setting that was never saved keeps following the configuration
 file.
 

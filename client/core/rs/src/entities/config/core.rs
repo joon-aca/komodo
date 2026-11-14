@@ -366,13 +366,17 @@ fn ui_instance_name_deserializer<'de, D: Deserializer<'de>>(
     .map_err(serde::de::Error::custom)
 }
 
+/// An empty variable is the same as an unset one. A Compose file that
+/// passes `${KOMODO_UI_INSTANCE_NAME:-}` must not override the name
+/// saved in Settings or set in the config file with no name.
 fn option_ui_instance_name_deserializer<'de, D: Deserializer<'de>>(
   deserializer: D,
 ) -> Result<Option<String>, D::Error> {
-  Option::<String>::deserialize(deserializer)?
+  let name = Option::<String>::deserialize(deserializer)?
     .map(|name| validate_ui_instance_name(&name))
     .transpose()
-    .map_err(serde::de::Error::custom)
+    .map_err(serde::de::Error::custom)?;
+  Ok(name.filter(|name| !name.is_empty()))
 }
 
 /// # Core Configuration File
@@ -1358,5 +1362,13 @@ mod tests {
     );
     let env = serde_json::from_value::<Env>(json!({})).unwrap();
     assert!(env.komodo_ui_instance_name.is_none());
+    // An empty or blank variable is the same as an unset one.
+    for empty in ["", "   "] {
+      let env = serde_json::from_value::<Env>(
+        json!({ "komodo_ui_instance_name": empty }),
+      )
+      .unwrap();
+      assert!(env.komodo_ui_instance_name.is_none());
+    }
   }
 }
