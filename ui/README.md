@@ -65,3 +65,28 @@ value. Leave it empty for the stock login page and header.
 The name is part of the public `GET /ui-config` response, so anyone who can
 reach the login page can read it. `KOMODO_TITLE` keeps its existing
 browser-title behavior and is independent of this setting.
+
+## Appearance settings
+
+An admin can change the instance name and the palette in **Settings →
+Appearance** without restarting Core. The tab shows each palette in light and
+dark mode. Saving reloads the page; other open sessions change on their next
+load. Non-admins do not see the tab and Core refuses their requests.
+
+Each setting is resolved separately, in this order:
+
+1. The environment variable (`KOMODO_UI_THEME`, `KOMODO_UI_INSTANCE_NAME`).
+2. The value saved in Settings.
+3. The Core configuration file.
+4. The stock appearance.
+
+A setting the environment controls is shown as locked in the tab, and Core
+refuses to save it. Remove the variable and restart Core to change it in
+Settings. A setting that was never saved keeps following the configuration
+file.
+
+Saved values are stored as one document in the `Settings` database
+collection. Core reads it at startup and keeps the result in memory, so
+`GET /ui-config` does not query the database. An older Core ignores the
+collection: before downgrading, set both environment variables so the
+instance keeps its identity.

@@ -29,6 +29,8 @@ title = "Komodo"
 ## Options: "default" (stock appearance), "blue", "violet".
 ## This does not change status colors or the user's light/dark preference.
 ## Restart Core and reload the browser after changing this setting.
+## An admin can also save a palette in Settings > Appearance. A saved
+## palette overrides this file, and KOMODO_UI_THEME overrides both.
 ## Env: KOMODO_UI_THEME
 ## Default: "default"
 ui_theme = "default"
@@ -37,6 +39,8 @@ ui_theme = "default"
 ## Shown on the login page and beside the logo in the header.
 ## It is public: anyone who can reach the login page can read it.
 ## At most 40 characters. Leave empty for the stock login page and header.
+## An admin can also save a name in Settings > Appearance. A saved name
+## overrides this file, and KOMODO_UI_INSTANCE_NAME overrides both.
 ## Env: KOMODO_UI_INSTANCE_NAME
 ## Default: empty
 ui_instance_name = ""
