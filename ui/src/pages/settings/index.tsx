@@ -10,6 +10,7 @@ import SettingsProviders from "./providers";
 import { ICONS } from "@/lib/icons";
 import SettingsOnboardingKeys from "./onboarding";
 import SettingsUsers from "./users";
+import SettingsAppearance from "./appearance";
 
 const Resources = lazy(() => import("@/pages/resources"));
 
@@ -17,7 +18,8 @@ export default function Settings() {
   const user = useUser().data;
   const [view, setView] = useSettingsView();
   const currentView =
-    (view === "Users" || view === "Providers") && !user?.admin
+    (view === "Users" || view === "Providers" || view === "Appearance") &&
+    !user?.admin
       ? "Variables"
       : view;
   return (
@@ -58,6 +60,12 @@ export default function Settings() {
             value: "Users",
             content: <SettingsUsers />,
             icon: ICONS.User,
+            hidden: !user?.admin,
+          },
+          {
+            value: "Appearance",
+            content: <SettingsAppearance />,
+            icon: ICONS.Appearance,
             hidden: !user?.admin,
           },
           {

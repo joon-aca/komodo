@@ -41,6 +41,7 @@ use super::Variant;
 mod action;
 mod alert;
 mod alerter;
+mod appearance;
 mod build;
 mod builder;
 mod deployment;
@@ -270,6 +271,9 @@ enum ReadRequest {
   // ==== ALERT ====
   ListAlerts(ListAlerts),
   GetAlert(GetAlert),
+
+  // ==== APPEARANCE ====
+  GetAppearance(GetAppearance),
 
   // ==== VARIABLE ====
   GetVariable(GetVariable),

@@ -767,6 +767,7 @@ export type SettingsView =
   | "Alerters"
   | "Providers"
   | "Users"
+  | "Appearance"
   | "Onboarding";
 
 const viewAtom = atomWithStorage<SettingsView>("settings-view-v2", "Variables");

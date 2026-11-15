@@ -520,6 +520,7 @@ export declare enum Operation {
     GlobalAutoUpdate = "GlobalAutoUpdate",
     RotateAllServerKeys = "RotateAllServerKeys",
     RotateCoreKeys = "RotateCoreKeys",
+    UpdateAppearance = "UpdateAppearance",
     CreateVariable = "CreateVariable",
     UpdateVariableValue = "UpdateVariableValue",
     DeleteVariable = "DeleteVariable",
@@ -2087,6 +2088,36 @@ export interface Alert {
 }
 export type GetAlertResponse = Alert;
 export type GetAlerterResponse = Alerter;
+/** Instance background palette, independent of the user's light/dark mode. */
+export declare enum UiTheme {
+    Default = "default",
+    Blue = "blue",
+    Violet = "violet"
+}
+/**
+ * The appearance this instance currently shows, and which of its
+ * settings the environment controls.
+ *
+ * Each value is resolved in this order: the environment variable,
+ * then the value saved in Settings, then the Core config file.
+ */
+export interface Appearance {
+    /** The instance background palette in effect. */
+    ui_theme: UiTheme;
+    /** The instance name in effect. Empty when the instance is unnamed. */
+    ui_instance_name: string;
+    /**
+     * `KOMODO_UI_THEME` is set. It overrides the saved palette,
+     * which cannot be changed until the variable is removed.
+     */
+    ui_theme_from_env: boolean;
+    /**
+     * `KOMODO_UI_INSTANCE_NAME` is set. It overrides the saved name,
+     * which cannot be changed until the variable is removed.
+     */
+    ui_instance_name_from_env: boolean;
+}
+export type GetAppearanceResponse = Appearance;
 export interface BuildActionState {
     building: boolean;
 }
@@ -5848,6 +5879,7 @@ export interface SwarmQuerySpecifics {
     servers: string[];
 }
 export type SwarmQuery = ResourceQuery<SwarmQuerySpecifics>;
+export type UpdateAppearanceResponse = Appearance;
 export type UpdateGitProviderAccountResponse = GitProviderAccount;
 export type UpdateImageRegistryAccountResponse = ImageRegistryAccount;
 export type UpdateOnboardingKeyResponse = OnboardingKey;
@@ -7686,6 +7718,12 @@ export interface GetAlertersSummary {
 /** Response for [GetAlertersSummary]. */
 export interface GetAlertersSummaryResponse {
     total: number;
+}
+/**
+ * Get the instance appearance in effect, and which of its settings
+ * the environment controls. Response: [Appearance].
+ */
+export interface GetAppearance {
 }
 /** Get a specific build. Response: [Build]. */
 export interface GetBuild {
@@ -10794,6 +10832,21 @@ export interface UpdateAlerter {
     config: _PartialAlerterConfig;
 }
 /**
+ * **Admin only.** Save the instance appearance. Response: [Appearance].
+ *
+ * Omit a field to leave it as it is. A field the environment
+ * controls cannot be set and the request is refused.
+ */
+export interface UpdateAppearance {
+    /** The instance background palette to save. */
+    ui_theme?: UiTheme;
+    /**
+     * The instance name to save, at most 40 characters.
+     * An empty name shows none.
+     */
+    ui_instance_name?: string;
+}
+/**
  * Update the build at the given id, and return the updated build.
  * Response: [Build].
  *
@@ -11925,6 +11978,9 @@ export type ReadRequest = {
     type: "GetAlert";
     params: GetAlert;
 } | {
+    type: "GetAppearance";
+    params: GetAppearance;
+} | {
     type: "GetVariable";
     params: GetVariable;
 } | {
@@ -12303,6 +12359,9 @@ export type WriteRequest = {
 } | {
     type: "UpdateTagColor";
     params: UpdateTagColor;
+} | {
+    type: "UpdateAppearance";
+    params: UpdateAppearance;
 } | {
     type: "CreateVariable";
     params: CreateVariable;

@@ -192,6 +192,7 @@ export var Operation;
     Operation["GlobalAutoUpdate"] = "GlobalAutoUpdate";
     Operation["RotateAllServerKeys"] = "RotateAllServerKeys";
     Operation["RotateCoreKeys"] = "RotateCoreKeys";
+    Operation["UpdateAppearance"] = "UpdateAppearance";
     Operation["CreateVariable"] = "CreateVariable";
     Operation["UpdateVariableValue"] = "UpdateVariableValue";
     Operation["DeleteVariable"] = "DeleteVariable";
@@ -294,6 +295,13 @@ export var SeverityLevel;
      */
     SeverityLevel["Critical"] = "CRITICAL";
 })(SeverityLevel || (SeverityLevel = {}));
+/** Instance background palette, independent of the user's light/dark mode. */
+export var UiTheme;
+(function (UiTheme) {
+    UiTheme["Default"] = "default";
+    UiTheme["Blue"] = "blue";
+    UiTheme["Violet"] = "violet";
+})(UiTheme || (UiTheme = {}));
 export var Timelength;
 (function (Timelength) {
     /** `1-sec` */

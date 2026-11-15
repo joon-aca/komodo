@@ -49,6 +49,7 @@ import {
   Network,
   NotebookPen,
   Package,
+  Palette,
   Pause,
   Play,
   Plus,
@@ -96,6 +97,7 @@ export const ICONS = {
   ResourceSync: FolderSync,
   ExportToml: FileDown,
   Variable,
+  Appearance: Palette,
   Provider: CloudCog,
   // PAGES
   Dashboard: LayoutDashboard,

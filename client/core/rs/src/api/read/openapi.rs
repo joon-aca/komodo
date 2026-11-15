@@ -123,6 +123,8 @@ use crate::api::read;
     read::get_resource_sync,
     read::get_resource_sync_action_state,
     read::get_resource_syncs_summary,
+    // appearance
+    read::get_appearance,
     // variable
     read::list_variables,
     read::get_variable,

@@ -8,6 +8,26 @@ const PALETTES = {
   violet: { light: "#f0e5fc", dark: "#25182f" },
 };
 
+/**
+ * Every built-in palette with its page color in each mode, for previews.
+ * The stock palette has no colors of its own: these are Mantine's body colors.
+ */
+export const INSTANCE_THEME_OPTIONS: {
+  value: InstanceTheme;
+  label: string;
+  light: string;
+  dark: string;
+}[] = [
+  {
+    value: "default",
+    label: "Default",
+    light: "var(--mantine-color-white)",
+    dark: "var(--mantine-color-dark-7)",
+  },
+  { value: "blue", label: "Blue", ...PALETTES.blue },
+  { value: "violet", label: "Violet", ...PALETTES.violet },
+];
+
 export interface UiConfig {
   theme: InstanceTheme;
   /** Empty when the instance is unnamed. */
@@ -16,7 +36,7 @@ export interface UiConfig {
 
 const APP_NAME = "KOMODO";
 /** Matches Core's limit; guards the layout against any other responder. */
-const INSTANCE_NAME_MAX_CHARS = 40;
+export const INSTANCE_NAME_MAX_CHARS = 40;
 
 // Resolved once before the first render and constant afterwards.
 let uiConfig: UiConfig = { theme: "default", instanceName: "" };
