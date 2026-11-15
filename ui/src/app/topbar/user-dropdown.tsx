@@ -6,8 +6,10 @@ import {
   Flex,
   Group,
   Menu,
+  SegmentedControl,
   Stack,
   Text,
+  useMantineColorScheme,
 } from "@mantine/core";
 import {
   ArrowLeftRight,
@@ -127,6 +129,9 @@ export default function UserDropdown() {
             </Button>
           </Group>
 
+          {/* The topbar has no room for its theme toggle at phone width. */}
+          <ColorSchemeControl />
+
           {viewLogout && (
             <Button
               variant="filled"
@@ -144,6 +149,24 @@ export default function UserDropdown() {
         </Stack>
       </Menu.Dropdown>
     </Menu>
+  );
+}
+
+function ColorSchemeControl() {
+  const { colorScheme, setColorScheme } = useMantineColorScheme();
+  return (
+    <SegmentedControl
+      hiddenFrom="xs"
+      aria-label="Color scheme"
+      fullWidth
+      value={colorScheme}
+      onChange={(scheme) => setColorScheme(scheme as typeof colorScheme)}
+      data={[
+        { value: "light", label: "Light" },
+        { value: "dark", label: "Dark" },
+        { value: "auto", label: "Auto" },
+      ]}
+    />
   );
 }
 

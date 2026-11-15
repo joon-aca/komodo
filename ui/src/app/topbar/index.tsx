@@ -45,7 +45,8 @@ const Topbar = ({
       })}
       bg="accent.1"
       pl="1.3rem"
-      pr="2rem"
+      // The user button carries its own trailing space at phone width.
+      pr={{ base: "0.5rem", xs: "2rem" }}
       py="0rem"
     >
       {/** LEFT AREA */}
@@ -115,7 +116,11 @@ const Topbar = ({
         <WebsocketStatus />
         <TopbarAlerts />
         <TopbarUpdates />
-        <ThemeToggle />
+        {/* On phones the color scheme moves into the user menu, which leaves
+            room for the instance name. */}
+        <Box visibleFrom="xs">
+          <ThemeToggle />
+        </Box>
         <UserDropdown />
       </Group>
     </AppShell.Header>
